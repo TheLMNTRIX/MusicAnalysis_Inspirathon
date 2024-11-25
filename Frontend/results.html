@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Analysis Layout</title>
+    <style>
+        body {
+            background-color: #f0d9d4;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 73%;
+            height: auto;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .top-image {
+            width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+            margin-top: 20px;
+        }
+        .bottom-images {
+            display: flex;
+            justify-content: space-between;
+        }
+        .bottom-image {
+            width: 32%;
+            height: auto;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-radius 0.3s ease;
+        }
+        .bottom-image:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 26px; /* Curved corners */
+        }
+        .overall-structure {
+            width: 90%;
+        }
+        .segments {
+            margin-left: 25px;
+            width: 90%;
+        }
+        .samples {
+            margin-left: 42px;
+            width: 90%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="AudioAnalysis.png" alt="Audio Analysis" class="top-image">
+        <div class="bottom-images">
+            <a href="javascript:void(0)" onclick="navigateToSection('overall-structure.html')">
+                <img src="OverallStructure.png" alt="Overall Structure" class="bottom-image overall-structure">
+            </a>
+            <a href="javascript:void(0)" onclick="navigateToSection('segments.html')">
+                <img src="Segments.png" alt="Segments" class="bottom-image segments">
+            </a>
+            <a href="javascript:void(0)" onclick="navigateToSection('samples.html')">
+                <img src="Samples.png" alt="Samples" class="bottom-image samples">
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const analysisData = localStorage.getItem('analysisData');
+            if (!analysisData) {
+                alert('No analysis data found. Please upload a file first.');
+                window.location.href = 'index.html';
+                return;
+            }
+        });
+
+        function navigateToSection(page) {
+            const analysisData = localStorage.getItem('analysisData');
+            if (analysisData) {
+                window.location.href = page;
+            } else {
+                alert('No analysis data found. Please upload a file first.');
+                window.location.href = 'uploadmusic.html';
+            }
+        }
+    </script>
+</body>
+</html>

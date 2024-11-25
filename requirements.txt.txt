@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pydantic
+google-generativeai
+librosa==0.10.1
+soundfile
+numpy
+starlette
+python-multipart

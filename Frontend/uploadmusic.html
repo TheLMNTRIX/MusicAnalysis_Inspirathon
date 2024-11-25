@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Music Files</title>
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+    body {
+      background-color: #f0d9d4;
+    }
+    .uploadfile {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 3%;
+      width: 23%;
+      opacity: 0;
+      animation: easeInFromTop 1s ease-out forwards;
+    }
+    .ndimage {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 1%;
+      width: 80%;
+      cursor: pointer;
+      opacity: 0;
+      animation: easeInFromBottom 1s ease-out 0.5s forwards;
+    }
+    #fileInput {
+      display: none;
+    }
+    .loading {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .lottie-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    lottie-player {
+      filter: brightness(0) invert(1);
+    }
+    @keyframes easeInFromTop {
+      from {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes easeInFromBottom {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <img class="uploadfile" src="UploadText.png" alt="Upload file">
+  </div>
+  <div>
+    <input type="file" id="fileInput" accept=".mp3">
+    <label for="fileInput">
+      <img class="ndimage" src="Upload_file.png" alt="Upload file button">
+    </label>
+  </div>
+  <div class="loading" id="loadingIndicator">
+    <div class="lottie-container">
+      <lottie-player src="https://lottie.host/fd5c0c68-4775-473d-a965-c02839f24f8d/aX5TccOFSa.json"
+        background="transparent" speed="1" style="width: 300px; height: 300px" loop autoplay></lottie-player>
+    </div>
+  </div>
+
+  <script>
+    let db;
+    const DB_NAME = 'AudioFileDB';
+    const STORE_NAME = 'audioFiles';
+
+    // Open IndexedDB connection
+    const dbPromise = indexedDB.open(DB_NAME, 1);
+
+    dbPromise.onupgradeneeded = function(event) {
+      db = event.target.result;
+      db.createObjectStore(STORE_NAME);
+    };
+
+    dbPromise.onsuccess = function(event) {
+      db = event.target.result;
+    };
+
+    dbPromise.onerror = function(event) {
+      console.error("IndexedDB error:", event.target.error);
+    };
+
+    document.getElementById('fileInput').addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        storeFileAndAnalyze(file);
+      }
+    });
+
+    async function storeFileAndAnalyze(file) {
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      loadingIndicator.style.display = 'flex';
+
+      try {
+        // Store the file in IndexedDB
+        await storeFile(file);
+
+        // Proceed with analysis
+        await analyzeAudio(file);
+      } catch (error) {
+        console.error('Error storing file:', error);
+        alert('An error occurred while storing the file. Please try again.');
+        loadingIndicator.style.display = 'none';
+      }
+    }
+
+    function storeFile(file) {
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.put(file, 'audioFile');
+
+        request.onerror = function() {
+          reject("Error storing file in IndexedDB");
+        };
+
+        request.onsuccess = function() {
+          resolve();
+        };
+      });
+    }
+
+    async function analyzeAudio(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch('http://localhost:8000/analyze-audio', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const analysisData = await response.json();
+        localStorage.setItem('analysisData', JSON.stringify(analysisData));
+        
+        // Redirect to the samples page
+        window.location.href = 'menu.html';
+      } catch (error) {
+        console.error('Error during analysis:', error);
+        alert('An error occurred during analysis. Please try again.');
+      } finally {
+        loadingIndicator.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>

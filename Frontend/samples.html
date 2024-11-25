@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samples Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0d9d4;
+            color: white;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            width: 400px;
+            height: auto;
+            margin-left: -5px;
+            margin-top: 20px;
+        }
+        .extract-button {
+            font-family: 'Poppins', sans-serif;
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+        }
+        .extract-button:hover {
+            background-color: #555;
+        }
+        .extract-button img {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+        }
+        .card {
+            background-color: #c2a088;
+            border-radius: 10px;
+            padding: 15px;
+            width: 700px;
+            margin-bottom: 22px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .card.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .card-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 22px;
+        }
+        .card-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .card-label {
+            font-weight: regular;
+        }
+        .card-value {
+            text-align: right;
+        }
+        .divider {
+            border-top: 1px solid white;
+            margin: 10px 0;
+        }
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .lottie-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        lottie-player {
+            filter: brightness(0) invert(1);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="SampleRecommendationsDesign.png" alt="Samples" />
+    </div>
+    
+    <button class="extract-button" id="extractButton">
+        <img src="DownloadIcon.png" alt="Download" />
+        Extract Samples
+    </button>
+    
+    <div id="cardContainer"></div>
+
+    <div class="loading" id="loadingIndicator">
+        <div class="lottie-container">
+            <lottie-player src="https://lottie.host/fd5c0c68-4775-473d-a965-c02839f24f8d/aX5TccOFSa.json"
+                background="transparent" speed="1" style="width: 300px; height: 300px" loop autoplay></lottie-player>
+        </div>
+    </div>
+
+    <script>
+        let db;
+        const DB_NAME = 'AudioFileDB';
+        const STORE_NAME = 'audioFiles';
+
+        // Open IndexedDB connection
+        const dbPromise = indexedDB.open(DB_NAME, 1);
+
+        dbPromise.onupgradeneeded = function(event) {
+            db = event.target.result;
+            db.createObjectStore(STORE_NAME);
+        };
+
+        dbPromise.onsuccess = function(event) {
+            db = event.target.result;
+            loadAnalysisData();
+        };
+
+        dbPromise.onerror = function(event) {
+            console.error("IndexedDB error:", event.target.error);
+        };
+
+        // Function to create card elements
+        function createCard(data) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="card-title">${data.element_type} (${data.start_time}s - ${data.end_time}s)</div>
+                <div class="card-content">
+                    <div class="card-label">Sampling Potential</div>
+                    <div class="card-value">${data.sampling_potential}/10</div>
+                </div>
+                <div class="divider"></div>
+                <div class="card-content">
+                    <div class="card-label">Recommended Uses</div>
+                    <div class="card-value">${data.recommended_uses.join(', ')}</div>
+                </div>
+                <div class="divider"></div>
+                <div class="card-content">
+                    <div class="card-label">Technical Notes</div>
+                    <div class="card-value">${data.technical_notes}</div>
+                </div>
+            `;
+            return card;
+        }
+
+        // Load analysis data from localStorage and display recommendations
+        function loadAnalysisData() {
+            const analysisDataString = localStorage.getItem('analysisData');
+            if (!analysisDataString) {
+                alert('No analysis data found. Please upload a file first.');
+                return;
+            }
+
+            try {
+                const analysisData = JSON.parse(analysisDataString);
+                const cardContainer = document.getElementById('cardContainer');
+                analysisData.sampling_recommendations.forEach((data, index) => {
+                    const card = createCard(data);
+                    cardContainer.appendChild(card);
+                    setTimeout(() => {
+                        card.classList.add('show');
+                    }, index * 200);
+                });
+
+                document.getElementById('extractButton').addEventListener('click', async function() {
+                    await extractSamples(analysisData.sampling_recommendations);
+                });
+            } catch (error) {
+                console.error('Error parsing analysis data:', error);
+                alert('Error loading analysis data. Please try uploading the file again.');
+            }
+        }
+
+        // Function to extract samples using split-audio functionality
+        async function extractSamples(recommendations) {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            loadingIndicator.style.display = 'flex';
+
+            try {
+                const file = await getFileFromIndexedDB();
+                if (!file) {
+                    alert('No file data found. Please upload the file and try again.');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('input_data', JSON.stringify({ sampling_recommendations: recommendations }));
+
+                const response = await fetch('http://localhost:8000/split-samples', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'audio_samples.zip';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                alert('Samples extracted successfully!');
+            } catch (error) {
+                console.error('Error during sample extraction:', error);
+                alert('An error occurred during sample extraction. Please try again.');
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+        function getFileFromIndexedDB() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.get('audioFile');
+
+                request.onerror = function() {
+                    reject("Error retrieving file from IndexedDB");
+                };
+
+                request.onsuccess = function() {
+                    resolve(request.result);
+                };
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Segment Cards</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0d9d4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .header-image {
+            width: 200px;
+            height: 50px;
+            margin-bottom: 20px;
+        }
+        .header-image img {
+            width: 150%;
+            height: auto;
+            object-fit: contain;
+            margin-left: -25%;  
+        }
+        .card {
+            background-color: #68a9a5;
+            border-radius: 10px;
+            padding: 20px;
+            width: 700px;
+            margin-bottom: 20px;
+            color: white;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .card.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .card-title {
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 24px;
+        }
+        .card-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .subtopic {
+            grid-column: 1 / 2;
+        }
+        .value {
+            grid-column: 2 / 3;
+            text-align: right;
+        }
+        .divider {
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.3);
+            margin: 10px 0;
+            grid-column: 1 / -1;
+        }
+        .back-button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-image">
+        <img src="SegmentsDesign.png" alt="Segment">
+    </div>
+    <div id="cardContainer"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const analysisDataString = localStorage.getItem('analysisData');
+            if (!analysisDataString) {
+                alert('No analysis data found. Please upload a file first.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const analysisData = JSON.parse(analysisDataString);
+                const cardContainer = document.getElementById('cardContainer');
+                
+                analysisData.segments.forEach((segment, index) => {
+                    const card = createCard({
+                        title: `Segment (${segment.start_time}s - ${segment.end_time}s)`,
+                        content: {
+                            "Instruments": segment.musical_elements.instruments.join(', '),
+                            "Harmony": segment.musical_elements.harmony,
+                            "Rhythm": segment.musical_elements.rhythm,
+                            "Texture": segment.musical_elements.texture
+                        }
+                    });
+                    cardContainer.appendChild(card);
+                    
+                    // Delay the appearance of each card
+                    setTimeout(() => {
+                        card.classList.add('show');
+                    }, index * 200);
+                });
+            } catch (error) {
+                console.error('Error parsing analysis data:', error);
+                alert('Error loading analysis data. Please try uploading the file again.');
+                window.location.href = 'index.html';
+            }
+        });
+
+        function createCard(data) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            const title = document.createElement('div');
+            title.className = 'card-title';
+            title.textContent = data.title;
+            card.appendChild(title);
+
+            const content = document.createElement('div');
+            content.className = 'card-content';
+            
+            Object.entries(data.content).forEach(([key, value], index) => {
+                const keyElement = document.createElement('div');
+                keyElement.className = 'subtopic';
+                keyElement.textContent = key;
+                content.appendChild(keyElement);
+
+                const valueElement = document.createElement('div');
+                valueElement.className = 'value';
+                valueElement.textContent = value;
+                content.appendChild(valueElement);
+
+                if (index < Object.entries(data.content).length - 1) {
+                    const divider = document.createElement('div');
+                    divider.className = 'divider';
+                    content.appendChild(divider);
+                }
+            });
+
+            card.appendChild(content);
+            return card;
+        }
+    </script>
+</body>
+</html>

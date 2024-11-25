@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI-Driven Music Sampling</title>
+  
+  <!-- Google Fonts Link for Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif; /* Applying Poppins font */
+    }
+    
+    body {
+      background-color: #f0d9d4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      padding: 20px;
+      overflow: hidden;
+    }
+    
+    .container {
+      text-align: center;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .logo {
+      width: 40%; /* Set width of the logo */
+      height: auto; /* Maintain aspect ratio */
+      margin-bottom: 20px; /* Add some space between the logo and the header */
+      margin-top: 60px;
+      margin-left: 4%
+    }
+    
+    .text-section {
+      margin-bottom: 40px;
+    }
+    
+    .text-section h1 {
+      font-size: 2.5rem;
+      color: #222;
+      margin-bottom: 1px;
+      margin-left: 30px;
+      margin-top: 10px;
+    }
+    
+    .text-section p {
+      font-size: 1.2rem;
+      color: #666;
+      margin-bottom: 20px;
+      margin-left: 30px;
+    }
+    
+    .upload-btn {
+        padding: 15px 40px; /* Increased padding for larger size */
+        font-size: 1.2rem; /* Increased font size */
+        background-color: #ff5722; /* Adjusted to match orange color */
+        color: white; /* White text */
+        border: none;
+        border-radius: 50px; /* Large rounded corners */
+        display: flex; /* Flexbox to align icon and text */
+        justify-content: center; /* Center the content */
+        align-items: center; /* Vertically align icon and text */
+        gap: 10px; /* Space between icon and text */
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 65px;
+        margin-left: 35%;
+      }
+  
+      .upload-btn:hover {
+        background-color: #ff7043; /* Lighter shade on hover */
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      }
+  
+      .upload-btn img {
+        width: 20px; /* Icon size */
+        height: 20px;
+      }
+    
+    .para1 {
+      margin-top: 7px;
+      font-weight: 550;
+    }
+
+    .lower-image {
+      width: 135%;  /* Increased from default */
+      height: auto;  /* Maintain aspect ratio */
+      margin-top: 20px;  /* Add some space above the image */
+      margin-left: -16%;
+      margin-bottom: 43px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Add the logo here -->
+    <img src="logo.png" alt="Company Logo" class="logo">
+    
+    <section class="text-section">
+      <h1>Unlock the Power of Music <br> with AI-Driven Sampling Tools</h1>
+      <p class="para1">Discover, Analyze, and Remix Your Favourite Tracks with Ease</p>
+      <button class="upload-btn" onclick="window.location.href='uploadmusic.html'">
+        <img src="upload-icon.png" alt="Upload Icon"> <!-- Replace with your icon source -->
+        Upload Music File
+      </button>
+    </section>
+    <img src="bento.png" alt="AI Music Sampling Illustration" class="lower-image">
+  </div>
+
+  <script>
+    document.querySelector('.upload-btn').addEventListener('click', function() {
+      window.location.href = 'uploadmusic.html';
+    });
+  </script>
+</body>
+</html>
